@@ -10,6 +10,7 @@ canvas {
     display: block;
     width: 100vw;
     height: 100vh;
+    
 }
 
 
@@ -19,7 +20,10 @@ canvas {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: #fff;
+    background-image: url('../img/cargando.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: 2000;
     display: flex;
     justify-content: center;
@@ -30,6 +34,10 @@ canvas {
 .slide-up {
     transform: translateY(-100%);
     opacity: 0;
+}
+.slide-normal {
+    transform: translateY(100%);
+    opacity: 1;
 }
 
 #menu_inicio {
@@ -83,4 +91,96 @@ canvas {
     opacity: 0.01;
     position: absolute;
     z-index: 1;
+}
+
+#label_cargando{
+    color: white;
+    font-size: 5vw;
+}
+
+#navbar_seleccion{
+    height: 7vh;
+    background-color: rgb(17, 16, 16);
+}
+
+/* Estilos generales para todos los botones */
+button {
+    border: none;
+    outline: none;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+/* Personalización de botones individuales */
+#boton_algoritmo1 {
+    background-image: url('../img/botonmarcado.png');
+    color: yellow;
+}
+
+#boton_algoritmo2,
+#boton_algoritmo3 {
+    background-image: url('../img/botonvacio.png');
+    color: white;
+}
+
+/* Botón de cambiar mapa */
+#boton_lab_cambiar_mapa {
+    position: fixed;
+    right: 2vw;
+    bottom: 12vh;
+    width: 20vh;
+    height: 7vh;
+    font-size: 2.5vh;
+    background-image: url('../img/botonvacio.png');
+    color: white;
+}
+
+/* Botón de iniciar algoritmo */
+#boton_algoritmo_iniciar {
+    position: fixed;
+    right: 2vw;
+    top: 0vh;
+    width: 20vh;
+    height: 7vh;
+    font-size: 2.5vh;
+    background-image: url('../img/botonvacio.png');
+    color: white;
+}
+
+#boton_algoritmo_iniciar:hover {
+    background-image: url('../img/botonmarcado.png');
+    color: yellow;
+}
+
+/* 🔁 RESPONSIVE MEDIA QUERIES */
+@media (max-width: 600px) {
+    #boton_algoritmo1,
+    #boton_algoritmo2,
+    #boton_algoritmo3 {
+        width: 20vw;
+        height: 6vh;
+        font-size: 2.2vh;
+    }
+
+    #boton_lab_cambiar_mapa,
+    #boton_algoritmo_iniciar {
+        width: 30vw;
+        height: 6vh;
+        font-size: 2vh;
+        right: 5vw;
+    }
+}
+
+@media (min-width: 1200px) {
+    #boton_algoritmo1,
+    #boton_algoritmo2,
+    #boton_algoritmo3 {
+        font-size: 3vh;
+        width: 20vw;
+        height: 6vh;
+    }
 }

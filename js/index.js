@@ -1,15 +1,17 @@
 const fileInput = document.getElementById('fileInput');
 const boton_cargarlaberinto = document.getElementById('boton_cargarlaberinto');
 const fileName = document.getElementById('fileName');
+let centradox = 0
+let centradoz = 0
 
+let seleccion_algoritmo = 1
 let info_laberinto
 
 boton_cargarlaberinto.addEventListener('click', () => {
     fileInput.click(); // Simula el clic al input real
 });
 
-fileInput.addEventListener('change', () => {
-
+fileInput.addEventListener('change', () => {        //ACCION CUANDO LEE EL ARCHIVO
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -18,30 +20,24 @@ fileInput.addEventListener('change', () => {
             let jsonData = e.target.result;
             info_laberinto = JSON.parse(jsonData);
             console.log("EXITO AL CARGAR JSON");
-            console.log(info_laberinto.ancho, info_laberinto.alto, info_laberinto.inicio, info_laberinto.fin, info_laberinto.paredes)
+            //console.log(info_laberinto.ancho, info_laberinto.alto, info_laberinto.inicio, info_laberinto.fin, info_laberinto.paredes)
             armar_laberinto(scene, info_laberinto.ancho, info_laberinto.alto, info_laberinto.paredes)
 
-            const centradox = (info_laberinto.ancho ) / 2;     // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN X
-            const centradoz = (info_laberinto.alto  ) / 2;      // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN Z
-            model.position.x = (info_laberinto.inicio[0] - centradox  )
-            model.position.z = (info_laberinto.inicio[1] - centradoz  )
+            centradox = (info_laberinto.ancho) / 2;     // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN X
+            centradoz = (info_laberinto.alto) / 2;      // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN Z
+            model.position.x = (info_laberinto.inicio[0] - centradox)
+            model.position.z = (info_laberinto.inicio[1] - centradoz)
         } catch (error) {
             console.log("Error al cargar el JSON: " + error);
         }
     };
     reader.readAsText(file);
 
-
-
-
-
-
     const pantalla_menu = document.getElementById('menu_inicio');
     pantalla_menu.classList.add('slide-up');
     setTimeout(() => {
         pantalla_carga.style.display = 'none';
     }, 4000);
-
 });
 
 
@@ -109,8 +105,11 @@ const loader = new THREE.GLTFLoader();
 
 
 // Variables globales
-let model, mixer, AnimacionCaminar, clock;
+let model, mixer, AnimacionCaminar;
+const clock = new THREE.Clock();
 let moverse;
+let moviendo = false;
+let movimientoData = null;
 const personajeContenedor = new THREE.Group();      //CRAMOS UN CONTENEDOR PARA EL PERSONAJE
 scene.add(personajeContenedor);
 
@@ -156,13 +155,11 @@ loader.load('./modelos/steve3d.glb', (gltf) => {                  // CARGAMOS MO
                 moverse = mixer.clipAction(AnimacionCaminar);
                 //moverse.play();
             }
-
             const pantalla_carga = document.getElementById('pantalla_carga');
             pantalla_carga.classList.add('slide-up');
             setTimeout(() => {
                 pantalla_carga.style.display = 'none';
             }, 4000);
-
         }
     },
         (xhr) => {                                                      //MIENTRAS CARGA LA ANIMACION
@@ -185,24 +182,102 @@ function caminar() {
 function detenerse() {
     moverse.stop();
 }
+function cambiar_color(num) {
+    document.getElementById("boton_algoritmo1").style.backgroundImage = "url('../img/botonvacio.png')";
+    document.getElementById("boton_algoritmo1").style.color = "white";
+
+    document.getElementById("boton_algoritmo2").style.backgroundImage = "url('../img/botonvacio.png')";
+    document.getElementById("boton_algoritmo2").style.color = "white";
+
+    document.getElementById("boton_algoritmo3").style.backgroundImage = "url('../img/botonvacio.png')";
+    document.getElementById("boton_algoritmo3").style.color = "white";
+
+    if (num == 1) {
+        document.getElementById("boton_algoritmo1").style.backgroundImage = "url('../img/botonmarcado.png')";
+    } else if (num == 2) {
+        document.getElementById("boton_algoritmo2").style.backgroundImage = "url('../img/botonmarcado.png')";
+    } else {
+        document.getElementById("boton_algoritmo3").style.backgroundImage = "url('../img/botonmarcado.png')";
+    }
+}
+function algoritmo1() {
+    seleccion_algoritmo = 1
+    cambiar_color(1)
+
+}
+function algoritmo2() {
+    seleccion_algoritmo = 2
+    cambiar_color(2)
+    caminarHacia(0, 0);
+}
+function algoritmo3() {
+    seleccion_algoritmo = 3
+    cambiar_color(3)
+    personajeContenedor.position.x = 0
+    personajeContenedor.position.z = 0
+    //moverPersonaje(personajeContenedor,1,0)  
+}
+function iniciar_laberinto() {
+    console.log(seleccion_algoritmo)
+    let camino = [info_laberinto.inicio[0], info_laberinto.inicio[1]]
+    if (seleccion_algoritmo === 1) {
+        camino = resolverCaminoDijkstra(info_laberinto.inicio, info_laberinto.fin);
+    } else if (seleccion_algoritmo === 2) {
+        alert("NO IMPLEMENTADO EL ALGORITMO 2")
+        return
+    } else {
+        alert("NO IMPLEMENTADO EL ALGORITMO 3")
+        return
+    }
+
+    console.log("Camino encontrado:", camino);
+
+    //QUE EL PERSONAJE RECORRA EL CAMINO
+    recorrer_laberinto(camino)
 
 
+}
 
-let walkSpeed = -0.01;                                         // VELOCIDAD DE ANIMACION
-function animate() {
+async function recorrer_laberinto(camino) {
+    for (let i = 0; i < camino.length; i++) {
+        let nodo = camino[i];
+        caminarHacia(nodo[0], nodo[1]);
+        console.log(nodo[0], nodo[1])
+        await new Promise(resolve => setTimeout(resolve, 3000)); // espera 1 segundo 
+    }
+}
+
+function cambiar_mapa() {
+    const pantalla_menu = document.getElementById('menu_inicio');
+    pantalla_menu.classList.remove('slide-up');
+    setTimeout(() => {
+        pantalla_menu.style.display = 'flex';
+        limpiar_laberinto(scene);
+        document.getElementById("fileInput").value = "";
+    }, 3000);
+}
+
+
+function animate() {                                        //ACTUALIZACION CONSTANTE DE IMAGEN
     requestAnimationFrame(animate);
-    //const delta = clock.getDelta(); // Obtener el tiempo delta
+    const delta = clock.getDelta();
 
     // Actualizar las animaciones del modelo
-
     if (mixer) {
-        mixer.update(0.7); // Actualizar animación
+        mixer.update(0.5); // Actualizar animación
     }
-    // Mover el modelo continuamente
-    /*
-    if (model) {
-        model.position.z -= walkSpeed; // Movimiento hacia adelante (eje Z negativo)
-    }*/
+    if (moviendo && movimientoData) {
+        movimientoData.tiempo += delta;
+        const t = Math.min(movimientoData.tiempo / movimientoData.tiempoTotal, 1);
+
+        personajeContenedor.position.x = THREE.MathUtils.lerp(movimientoData.xInicio, movimientoData.xFinal, t);
+        personajeContenedor.position.z = THREE.MathUtils.lerp(movimientoData.zInicio, movimientoData.zFinal, t);
+
+        if (t >= 1) {
+            moviendo = false;
+            moverse?.stop();
+        }
+    }
 
     controls.update();
     renderer.render(scene, camera);

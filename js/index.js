@@ -1,55 +1,10 @@
-const fileInput = document.getElementById('fileInput');
-const boton_cargarlaberinto = document.getElementById('boton_cargarlaberinto');
-const fileName = document.getElementById('fileName');
-let centradox = 0
-let centradoz = 0
-
-let seleccion_algoritmo = 1
-let info_laberinto
-
-boton_cargarlaberinto.addEventListener('click', () => {
-    fileInput.click(); // Simula el clic al input real
-});
-
-fileInput.addEventListener('change', () => {        //ACCION CUANDO LEE EL ARCHIVO
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            let jsonData = e.target.result;
-            info_laberinto = JSON.parse(jsonData);
-            console.log("EXITO AL CARGAR JSON");
-            //console.log(info_laberinto.ancho, info_laberinto.alto, info_laberinto.inicio, info_laberinto.fin, info_laberinto.paredes)
-            armar_laberinto(scene, info_laberinto.ancho, info_laberinto.alto, info_laberinto.paredes)
-
-            centradox = (info_laberinto.ancho) / 2;     // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN X
-            centradoz = (info_laberinto.alto) / 2;      // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN Z
-            model.position.x = (info_laberinto.inicio[0] - centradox)
-            model.position.z = (info_laberinto.inicio[1] - centradoz)
-        } catch (error) {
-            console.log("Error al cargar el JSON: " + error);
-        }
-    };
-    reader.readAsText(file);
-
-    const pantalla_menu = document.getElementById('menu_inicio');
-    pantalla_menu.classList.add('slide-up');
-    setTimeout(() => {
-        pantalla_carga.style.display = 'none';
-    }, 4000);
-});
-
-
-
-
 // ESCENA
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);       // TODO CELESTE, PARA SIMULAR UN CIELO
 
 // CAMARA       PERSPESCTIVA DE LA CAMARA
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 2, 5);
+camera.position.set(0, 10, 0);
 
 // RENDER
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -97,12 +52,13 @@ fillLight.position.set(-10, 10, -10);
 scene.add(fillLight);
 
 
+//VARIABLES
+const fileInput = document.getElementById('fileInput');
+const boton_cargarlaberinto = document.getElementById('boton_cargarlaberinto');
+const fileName = document.getElementById('fileName');
 
-
-
-// MODELO 3D (con corrección de typo)
-const loader = new THREE.GLTFLoader();
-
+let seleccion_algoritmo = 1
+let info_laberinto
 
 // Variables globales
 let model, mixer, AnimacionCaminar;
@@ -110,10 +66,43 @@ const clock = new THREE.Clock();
 let moverse;
 let moviendo = false;
 let movimientoData = null;
-const personajeContenedor = new THREE.Group();      //CRAMOS UN CONTENEDOR PARA EL PERSONAJE
+let itemDiamante= null
+const personajeContenedor = new THREE.Group();      //CREAMOS UN CONTENEDOR PARA EL PERSONAJE
 scene.add(personajeContenedor);
 
-// Cargar el modelo de 'child.glb' y su animación
+// MODELO 3D 
+const loader = new THREE.GLTFLoader();
+
+boton_cargarlaberinto.addEventListener('click', () => {
+    fileInput.click(); 
+});
+
+fileInput.addEventListener('change', () => {        //ACCION CUANDO LEE EL ARCHIVO
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            let jsonData = e.target.result;
+            info_laberinto = JSON.parse(jsonData);
+            console.log("EXITO AL CARGAR JSON");
+            armar_laberinto(scene, info_laberinto.ancho, info_laberinto.alto, info_laberinto.paredes)
+            mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+            camera.position.set(0, info_laberinto.alto+2, 0);
+        } catch (error) {
+            console.log("Error al cargar el JSON: " + error);
+        }
+    };
+    reader.readAsText(file);
+
+    const pantalla_menu = document.getElementById('menu_inicio');       //EFECTO DESLIZAMIENTO HACIA ARRIBA
+    pantalla_menu.classList.add('slide-up');
+    setTimeout(() => {
+        pantalla_carga.style.display = 'none';
+    }, 4000);
+});
+
+// Cargar el modelo personaje
 loader.load('./modelos/steve3d.glb', (gltf) => {                  // CARGAMOS MODELO
     //CONFIGURACION PRINCIPAL
     model = gltf.scene;
@@ -123,8 +112,6 @@ loader.load('./modelos/steve3d.glb', (gltf) => {                  // CARGAMOS MO
     personajeContenedor.add(model);                             //AGREGAMOS EL MODELO AL CONTENEDOR
     personajeContenedor.position.set(0, 0, 0);
 
-
-
     // PARA GUARDAR ANIMACIONES DE MODELO
     mixer = new THREE.AnimationMixer(model);
 
@@ -133,15 +120,8 @@ loader.load('./modelos/steve3d.glb', (gltf) => {                  // CARGAMOS MO
         if (child.isMesh) {
             child.castShadow = true;                            // EMITE SOMBRA
             //child.receiveShadow = true;                       // RECIBE SOMBRA
-            //EXTRA
         }
     });
-    // Luz que solo afecta al personaje
-
-    const luzPersonaje = new THREE.PointLight(0xffffff, 5, 5, 2);
-    luzPersonaje.position.set(0, 0, 0); // Posición sobre el personaje
-    luzPersonaje.castShadow = false;   // Desactivar sombras (si no quieres que la luz las proyecte)
-    personajeContenedor.add(luzPersonaje);
 
     // CARGAR ANIMACION DE CAMINAR (SE CARGA LUEGO DE QUE CARGA EL MODELO)
     loader.load('./animacion/walking.glb', (gltf) => {
@@ -153,7 +133,7 @@ loader.load('./modelos/steve3d.glb', (gltf) => {                  // CARGAMOS MO
             if (mixer) {
                 mixer.timeScale = 0.05
                 moverse = mixer.clipAction(AnimacionCaminar);
-                //moverse.play();
+                //moverse.play();               //PARA INICIAR ANIMACION DE MOVIMIENTO
             }
             const pantalla_carga = document.getElementById('pantalla_carga');
             pantalla_carga.classList.add('slide-up');
@@ -175,13 +155,6 @@ loader.load('./modelos/steve3d.glb', (gltf) => {                  // CARGAMOS MO
     (error) => console.error('Error al cargar child.glb:', error) //EN CASO DE ERROR
 );
 
-function caminar() {
-    moverse.play();
-}
-
-function detenerse() {
-    moverse.stop();
-}
 function cambiar_color(num) {
     document.getElementById("boton_algoritmo1").style.backgroundImage = "url('../img/botonvacio.png')";
     document.getElementById("boton_algoritmo1").style.color = "white";
@@ -200,25 +173,25 @@ function cambiar_color(num) {
         document.getElementById("boton_algoritmo3").style.backgroundImage = "url('../img/botonmarcado.png')";
     }
 }
+
 function algoritmo1() {
     seleccion_algoritmo = 1
     cambiar_color(1)
 
 }
+
 function algoritmo2() {
     seleccion_algoritmo = 2
     cambiar_color(2)
-    caminarHacia(0, 0);
 }
+
 function algoritmo3() {
     seleccion_algoritmo = 3
     cambiar_color(3)
-    personajeContenedor.position.x = 0
-    personajeContenedor.position.z = 0
-    //moverPersonaje(personajeContenedor,1,0)  
 }
+
 function iniciar_laberinto() {
-    console.log(seleccion_algoritmo)
+    document.getElementById("navbar_seleccion").style.display = "none";
     let camino = [info_laberinto.inicio[0], info_laberinto.inicio[1]]
     if (seleccion_algoritmo === 1) {
         camino = resolverCaminoDijkstra(info_laberinto.inicio, info_laberinto.fin);
@@ -245,6 +218,22 @@ async function recorrer_laberinto(camino) {
         console.log(nodo[0], nodo[1])
         await new Promise(resolve => setTimeout(resolve, 3000)); // espera 1 segundo 
     }
+    console.log("FINALICE")
+    //MOSTRAR LA VENTANA EMERGENTE
+    abrir_emergente()
+
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+    document.getElementById("navbar_seleccion").style.display = "block";
+}
+function reiniciar_animacion(){
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+    iniciar_laberinto()
+    document.getElementById("ventana_final").style.display = "none";
+    document.getElementById("navbar_seleccion").style.display = "none";
+}
+function emergente_cambiar_mapa(){
+    cerrar_emergente()
+    cambiar_mapa()
 }
 
 function cambiar_mapa() {
@@ -277,6 +266,12 @@ function animate() {                                        //ACTUALIZACION CONS
             moviendo = false;
             moverse?.stop();
         }
+
+        
+    }
+    if (itemDiamante) {
+        itemDiamante.rotation.y += 0.01; 
+        itemDiamante.position.y = 0.5 + Math.sin(Date.now() * 0.002) * 0.05;
     }
 
     controls.update();
@@ -284,8 +279,7 @@ function animate() {                                        //ACTUALIZACION CONS
 }
 animate();
 
-
-// RESPONSIVO
+// RESPONSIVE
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();

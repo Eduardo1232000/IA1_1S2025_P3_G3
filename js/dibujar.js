@@ -1,13 +1,12 @@
-
 let bloques_laberinto = [];
 let valor_centradox = 0
 let valor_centradoz = 0
+
+
 function armar_laberinto(scene, cantidad_x, cantidad_z, paredes) {
-    //console.log(cantidad_x, cantidad_z, paredes)
-    
-    const textura = new THREE.TextureLoader().load('./img/cuarzo.png'); //IMAGEN MATERIAL
+    const textura = new THREE.TextureLoader().load('./img/cuarzo.png');         //IMAGEN MATERIAL
     const material = new THREE.MeshBasicMaterial({ map: textura });
-    const textura2 = new THREE.TextureLoader().load('./img/ladrillonegro.jpg'); //IMAGEN MATERIAL
+    const textura2 = new THREE.TextureLoader().load('./img/ladrillonegro.jpg'); //IMAGEN MATERIAL 2
     const material2 = new THREE.MeshBasicMaterial({ map: textura2 });
 
     const ancho = 1;        // DEL BLOQUE
@@ -17,15 +16,14 @@ function armar_laberinto(scene, cantidad_x, cantidad_z, paredes) {
 
     valor_centradox = (cantidad_x * (ancho + separacion)) / 2;     // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN X
     valor_centradoz = (cantidad_z * (Profundidad + separacion)) / 2;      // DISTANCIA PARA QUE QUEDE TODO CENTRADO EN Z
-    
-    //console.log(valor_centradox, valor_centradoz)
+
     paredes.forEach(coordenada => {
         const geometry = new THREE.BoxGeometry(ancho, alto, Profundidad);       // GEOMETRIA CAJA
         const block = new THREE.Mesh(geometry, material);                       // TEXTURA
         block.position.set((coordenada[0]) * (ancho + separacion) - valor_centradox, 0.5, (coordenada[1]) * (alto + separacion) - valor_centradoz);                // POSICION
         scene.add(block);                                                       // AGREGAR A ESCENA
         bloques_laberinto.push(block);                                          // GUARDAR LOS BLOQUES EN LA LISTA (PARA BORRARLOS DESPUES)
-    mostrarEjes(scene, cantidad_x, cantidad_z, valor_centradox, valor_centradoz);
+        mostrarEjes(scene, cantidad_x, cantidad_z, valor_centradox, valor_centradoz);
     });
 
     //ARMAR PARED EXTERIOR
@@ -51,6 +49,46 @@ function armar_laberinto(scene, cantidad_x, cantidad_z, paredes) {
         crearBloque(cantidad_x, z);       // Borde derecho
     }
 
+    //DIBUJAR INICIO Y FIN
+    const geometry1 = new THREE.BoxGeometry(ancho, 0.01, Profundidad);
+    const block1 = new THREE.Mesh(geometry1, material2);
+    block1.position.set(
+        info_laberinto.inicio[0] - valor_centradox,
+        0.01,
+        info_laberinto.inicio[1] - valor_centradoz
+    );
+    scene.add(block1);
+    bloques_laberinto.push(block1);
+
+    const geometry2 = new THREE.BoxGeometry(ancho, 0.01, Profundidad);
+    const block2 = new THREE.Mesh(geometry2, material2);
+    block2.position.set(
+        info_laberinto.fin[0] - valor_centradox,
+        0.01,
+        info_laberinto.fin[1] - valor_centradoz
+    );
+    scene.add(block2);
+    bloques_laberinto.push(block2);
+
+
+    //AGREGAR UN DIAMANTE PARA INDICAR EL FIN
+    const texturaItem = new THREE.TextureLoader().load('./img/diamante.png');
+    const materialItem = new THREE.MeshBasicMaterial({
+        map: texturaItem,
+        transparent: true,
+        side: THREE.DoubleSide
+    });
+    const geometriaItem = new THREE.PlaneGeometry(0.5, 0.5);
+    itemDiamante = new THREE.Mesh(geometriaItem, materialItem);
+
+    itemDiamante.position.set(
+        info_laberinto.fin[0] * (ancho + separacion) - valor_centradox,
+        0.5,
+        info_laberinto.fin[1] * (Profundidad + separacion) - valor_centradoz
+    );
+    itemDiamante.rotation.y = Math.PI / 3;
+    scene.add(itemDiamante);
+    bloques_laberinto.push(itemDiamante);
 }
 
 function crearTextoSprite(texto) {
@@ -69,11 +107,10 @@ function crearTextoSprite(texto) {
     const material = new THREE.SpriteMaterial({ map: texture });
     const sprite = new THREE.Sprite(material);
 
-    sprite.scale.set(0.8, 0.4, 1); // Ajustá el tamaño si querés
-    bloques_laberinto.push(sprite);  
+    sprite.scale.set(0.8, 0.4, 1);
+    bloques_laberinto.push(sprite);
     return sprite;
 }
-
 
 function mostrarEjes(scene, cantidad_x, cantidad_z, centradox, centradoz) {
     for (let x = 0; x < cantidad_x; x++) {
@@ -81,7 +118,7 @@ function mostrarEjes(scene, cantidad_x, cantidad_z, centradox, centradoz) {
         textoX.position.set(
             x - centradox,
             1.1,
-            -centradoz -1
+            -centradoz - 1
         );
         scene.add(textoX);
     }
@@ -89,9 +126,9 @@ function mostrarEjes(scene, cantidad_x, cantidad_z, centradox, centradoz) {
     for (let z = 0; z < cantidad_z; z++) {
         const textoZ = crearTextoSprite(`${z}`);
         textoZ.position.set(
-            -centradox -1,
+            -centradox - 1,
             1.1,
-            z - centradoz 
+            z - centradoz
         );
         scene.add(textoZ);
     }
@@ -105,4 +142,5 @@ function limpiar_laberinto(scene) {
         bloque.material.dispose();              // QUITAR MATERIAL
     });
     bloques_laberinto = [];
+    itemDiamante = null
 }

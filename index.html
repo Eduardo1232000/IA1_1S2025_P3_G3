@@ -23,9 +23,19 @@
         <label id="label_cargando">Cargando...</label>
     </div>
     <div id="menu_inicio">
-        <input type="file" id="fileInput" accept=".pl">
+        <input type="file" id="fileInput" accept=".json">
         <button id="boton_cargarlaberinto"></button>
     </div>
+    <div id="ventana_final" class="emergente">
+        <div class="emergente-content">
+          <span class="cerrar_emergente" onclick="cerrar_emergente()">&times;</span>
+          <h2>¡Ha finalizado el Recorrido</h2>
+          <p>Presiona el boton de la accion que deseas realizar.</p>
+          <button onclick="reiniciar_animacion()" class="boton_emergente">Reiniciar la animacion</button>
+          <button onclick="cerrar_emergente()" class="boton_emergente">Utilizar otro algoritmo</button>
+          <button onclick="emergente_cambiar_mapa()" class="boton_emergente">Cargar nuevo laberinto</button>
+        </div>
+      </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
@@ -33,6 +43,7 @@
     <script src="./js/index.js"></script>
     <script src="./js/dibujar.js"></script>
     <script src="./js/movimiento.js"></script>
+    <script src="./js/emergente.js"></script>
     <script src="./js/algoritmo1.js"></script>
 </body>
 

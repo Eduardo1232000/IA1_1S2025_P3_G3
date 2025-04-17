@@ -196,8 +196,7 @@ function iniciar_laberinto() {
     if (seleccion_algoritmo === 1) {
         camino = resolverCaminoDijkstra(info_laberinto.inicio, info_laberinto.fin);
     } else if (seleccion_algoritmo === 2) {
-        alert("NO IMPLEMENTADO EL ALGORITMO 2")
-        return
+        camino = resolverCaminoBFS(info_laberinto.inicio, info_laberinto.fin);
     } else {
         alert("NO IMPLEMENTADO EL ALGORITMO 3")
         return

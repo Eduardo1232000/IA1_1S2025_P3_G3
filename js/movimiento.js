@@ -1,13 +1,13 @@
 function caminarHacia(xFinal, zFinal, velocidad = 1) {
-    console.log(xFinal, zFinal)
+    //console.log(xFinal, zFinal)
     const xmapa = xFinal
     const zmapa = zFinal
     xFinal = xFinal - valor_centradox
     zFinal = zFinal - valor_centradoz
-    console.log("FIN\n")
+    //console.log("FIN\n")
     const xInicio = personajeContenedor.position.x;
     const zInicio = personajeContenedor.position.z;
-    console.log("POS INICIAL: ", xInicio, "POS FINAL: ", zInicio)
+    //console.log("POS INICIAL: ", xInicio, "POS FINAL: ", zInicio)
     const distancia = Math.hypot(xFinal - xInicio, zFinal - zInicio);
     const tiempoTotal = distancia / velocidad;
 

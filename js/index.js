@@ -66,7 +66,7 @@ const clock = new THREE.Clock();
 let moverse;
 let moviendo = false;
 let movimientoData = null;
-let itemDiamante= null
+let itemDiamante = null
 const personajeContenedor = new THREE.Group();      //CREAMOS UN CONTENEDOR PARA EL PERSONAJE
 scene.add(personajeContenedor);
 
@@ -74,7 +74,7 @@ scene.add(personajeContenedor);
 const loader = new THREE.GLTFLoader();
 
 boton_cargarlaberinto.addEventListener('click', () => {
-    fileInput.click(); 
+    fileInput.click();
 });
 
 fileInput.addEventListener('change', () => {        //ACCION CUANDO LEE EL ARCHIVO
@@ -88,7 +88,7 @@ fileInput.addEventListener('change', () => {        //ACCION CUANDO LEE EL ARCHI
             console.log("EXITO AL CARGAR JSON");
             armar_laberinto(scene, info_laberinto.ancho, info_laberinto.alto, info_laberinto.paredes)
             mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
-            camera.position.set(0, info_laberinto.alto+2, 0);
+            camera.position.set(0, info_laberinto.alto + 2, 0);
         } catch (error) {
             console.log("Error al cargar el JSON: " + error);
         }
@@ -206,7 +206,8 @@ function iniciar_laberinto() {
     console.log("Camino encontrado:", camino);
 
     //QUE EL PERSONAJE RECORRA EL CAMINO
-    recorrer_laberinto(camino)
+    //recorrer_laberinto(camino)
+    
 
 
 }
@@ -216,22 +217,23 @@ async function recorrer_laberinto(camino) {
         let nodo = camino[i];
         caminarHacia(nodo[0], nodo[1]);
         console.log(nodo[0], nodo[1])
-        await new Promise(resolve => setTimeout(resolve, 3000)); // espera 1 segundo 
+        await new Promise(resolve => setTimeout(resolve, 1000)); // espera 1 segundo 
     }
     console.log("FINALICE")
     //MOSTRAR LA VENTANA EMERGENTE
     abrir_emergente()
 
     mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+    eliminar_bloques_recorridos()
     document.getElementById("navbar_seleccion").style.display = "block";
 }
-function reiniciar_animacion(){
+function reiniciar_animacion() {
     mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
     iniciar_laberinto()
     document.getElementById("ventana_final").style.display = "none";
     document.getElementById("navbar_seleccion").style.display = "none";
 }
-function emergente_cambiar_mapa(){
+function emergente_cambiar_mapa() {
     cerrar_emergente()
     cambiar_mapa()
 }
@@ -267,10 +269,10 @@ function animate() {                                        //ACTUALIZACION CONS
             moverse?.stop();
         }
 
-        
+
     }
     if (itemDiamante) {
-        itemDiamante.rotation.y += 0.01; 
+        itemDiamante.rotation.y += 0.01;
         itemDiamante.position.y = 0.5 + Math.sin(Date.now() * 0.002) * 0.05;
     }
 

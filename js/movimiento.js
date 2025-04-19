@@ -23,6 +23,11 @@ function caminarHacia(xFinal, zFinal, velocidad = 1) {
         xFinal,
         zFinal
     };
+
+
+    // CAMBIAR TEXTURA DEL BLOQUE CAMINADO
+    console.log("ANTES", xFinal, zFinal)
+    cambiar_marcado(xFinal, zFinal)
     return encontrar_sucesores(xmapa, zmapa)
 }
 

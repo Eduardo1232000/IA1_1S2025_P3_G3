@@ -17,7 +17,7 @@ class Dijkstra {
 
     insertar(vertice, pesoAcumulado, anterior) {
         const nuevo = new NodoDijkstra(vertice, pesoAcumulado, anterior);
-        if (this.ultimo === null) {    
+        if (this.ultimo === null) {
             this.raiz = nuevo;
             this.ultimo = nuevo;
         } else {
@@ -94,9 +94,14 @@ class Dijkstra {
 function posToStr(pos) {
     return `${pos[0]},${pos[1]}`;
 }
-function resolverCaminoDijkstra(inicio, fin) {
+
+function esperar(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function resolverCaminoDijkstra(inicio, fin) {
     const cola = [inicio];                      //COLA PARA RECORRER
-    const distancias = {};                     
+    const distancias = {};
     const anteriores = {};
 
     distancias[inicio] = 0;
@@ -106,12 +111,16 @@ function resolverCaminoDijkstra(inicio, fin) {
     const estructura = new Dijkstra();
     estructura.insertar(inicio, 0, "INICIO");
 
+
     while (cola.length > 0) {
         const actual = cola.shift();
         const claveActual = actual.toString();
         //console.log(actual.toString(), fin.toString())
+        //CAMINAR A LA POSICION
+        await esperar(2000);
+        caminarHacia(actual[0], actual[1]);
         if (claveActual === fin.toString()) break;
-        
+
         const sucesores = encontrar_sucesores(actual[0], actual[1]);
 
         for (let vecino of sucesores) {
@@ -139,9 +148,18 @@ function resolverCaminoDijkstra(inicio, fin) {
     let camino = estructura.crear_lista_nodos_recorrer(fin);
     //console.log(camino)
     //console.log(camino.reverse())
-    
+
     /*for (let i = camino.length - 1; i >= 0; i--) {
         console.log(camino[i]); 
     }*/
+
+    //FINALIZACION DE ALGORITMO
+    console.log("FINALICE")
+    //MOSTRAR LA VENTANA EMERGENTE
+    abrir_emergente()
+
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+    eliminar_bloques_recorridos()
+    document.getElementById("navbar_seleccion").style.display = "block";
     return camino.reverse()
 }

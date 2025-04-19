@@ -1,13 +1,20 @@
 let bloques_laberinto = [];
+let bloques_recorrido = [];
 let valor_centradox = 0
 let valor_centradoz = 0
-
+let textura3 ;
+let material3 ;
+let geometry3 ;
 
 function armar_laberinto(scene, cantidad_x, cantidad_z, paredes) {
     const textura = new THREE.TextureLoader().load('./img/cuarzo.png');         //IMAGEN MATERIAL
     const material = new THREE.MeshBasicMaterial({ map: textura });
     const textura2 = new THREE.TextureLoader().load('./img/ladrillonegro.jpg'); //IMAGEN MATERIAL 2
     const material2 = new THREE.MeshBasicMaterial({ map: textura2 });
+
+    textura3 = new THREE.TextureLoader().load('./img/lana.png');
+    material3 = new THREE.MeshBasicMaterial({ map: textura3 });
+    geometry3 = new THREE.BoxGeometry(1, 0.1, 1);
 
     const ancho = 1;        // DEL BLOQUE
     const alto = 1;         // DEL BLOQUE
@@ -143,4 +150,31 @@ function limpiar_laberinto(scene) {
     });
     bloques_laberinto = [];
     itemDiamante = null
+}
+
+function cambiar_marcado(posx, posz) {
+    let bloque = bloques_laberinto.find(bloque =>
+        bloque.position.x === posx &&
+        bloque.position.z === posz
+    );
+
+    const block3 = new THREE.Mesh(geometry3, material3);
+    block3.position.set(
+        posx,
+        0.01,
+        posz
+    );
+    scene.add(block3);
+    bloques_recorrido.push(block3);
+
+}
+
+function eliminar_bloques_recorridos() {
+    bloques_recorrido.forEach(bloque => {
+        scene.remove(bloque);                   // QUITAR DE LA ESCENA
+        bloque.geometry.dispose();              // QUITAR LA GEOMETRIA
+        if (bloque.material.map) bloque.material.map.dispose();
+        bloque.material.dispose();              // QUITAR MATERIAL
+    });
+    bloques_recorrido = [];
 }

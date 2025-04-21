@@ -109,6 +109,7 @@ async function resolverCaminoAStar(inicio, fin) {
                 personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]
             )
             eliminar_bloques_recorridos()
+            document.getElementById("navbar_seleccion").style.display = "block";
             return ruta
         }
 

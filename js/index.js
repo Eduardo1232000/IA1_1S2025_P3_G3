@@ -202,7 +202,7 @@ function iniciar_laberinto() {
         
     }
 
-    console.log("Camino encontrado:", camino);
+    //console.log("Camino encontrado:", camino);
 
     //QUE EL PERSONAJE RECORRA EL CAMINO
     //recorrer_laberinto(camino)

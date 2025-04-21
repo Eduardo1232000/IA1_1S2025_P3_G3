@@ -104,6 +104,8 @@ async function resolverCaminoDijkstra(inicio, fin) {
     const distancias = {};
     const anteriores = {};
 
+    let camino_temp=[]
+
     distancias[inicio] = 0;
     anteriores[inicio] = "INICIO";
 
@@ -117,8 +119,8 @@ async function resolverCaminoDijkstra(inicio, fin) {
         const claveActual = actual.toString();
         //console.log(actual.toString(), fin.toString())
         //CAMINAR A LA POSICION
-        await esperar(2000);
-        caminarHacia(actual[0], actual[1]);
+        //await esperar(2000);
+        //caminarHacia(actual[0], actual[1]);
         if (claveActual === fin.toString()) break;
 
         const sucesores = encontrar_sucesores(actual[0], actual[1]);
@@ -143,11 +145,15 @@ async function resolverCaminoDijkstra(inicio, fin) {
                 }
             }
         }
+        console.log("Ruta:", estructura.encontrarOrigen(actual));
+        camino_temp = estructura.crear_lista_nodos_recorrer(actual);
+        await mover_desde_inicio_hasta_nodo(camino_temp.reverse())
     }
     console.log("Ruta:", estructura.encontrarOrigen(fin));
     let camino = estructura.crear_lista_nodos_recorrer(fin);
     //console.log(camino)
     //console.log(camino.reverse())
+    await mover_desde_inicio_hasta_nodo(camino.reverse())
 
     /*for (let i = camino.length - 1; i >= 0; i--) {
         console.log(camino[i]); 

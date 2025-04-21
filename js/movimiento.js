@@ -1,4 +1,4 @@
-function caminarHacia(xFinal, zFinal, velocidad = 1) {
+function caminarHacia(xFinal, zFinal, velocidad = 2) {
     //console.log(xFinal, zFinal)
     const xmapa = xFinal
     const zmapa = zFinal
@@ -76,7 +76,7 @@ async function mover_desde_inicio_hasta_nodo(camino){
     for (let i = 0; i < camino.length; i++) {
         let nodo = camino[i];                           //NODO QUE LE TOCA
         caminarHacia(nodo[0], nodo[1]);                 // CAMINA HACIA EL NODO QUE LE TOCA
-        await new Promise(resolve => setTimeout(resolve, 1000)); // ESPERAR 1 SEGUNDO
+        await new Promise(resolve => setTimeout(resolve, 500)); // ESPERAR 1 SEGUNDO
     }
 
 }

@@ -98,7 +98,7 @@ fileInput.addEventListener('change', () => {        //ACCION CUANDO LEE EL ARCHI
     const pantalla_menu = document.getElementById('menu_inicio');       //EFECTO DESLIZAMIENTO HACIA ARRIBA
     pantalla_menu.classList.add('slide-up');
     setTimeout(() => {
-        pantalla_carga.style.display = 'none';
+        pantalla_carga.style.display = 'none'
     }, 4000);
 });
 
@@ -198,8 +198,8 @@ function iniciar_laberinto() {
     } else if (seleccion_algoritmo === 2) {
         camino = resolverCaminoBFS(info_laberinto.inicio, info_laberinto.fin);
     } else {
-        alert("NO IMPLEMENTADO EL ALGORITMO 3")
-        return
+        camino = resolverCaminoAStar(info_laberinto.inicio, info_laberinto.fin)
+        
     }
 
     console.log("Camino encontrado:", camino);

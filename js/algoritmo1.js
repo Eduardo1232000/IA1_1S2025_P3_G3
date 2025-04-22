@@ -117,10 +117,6 @@ async function resolverCaminoDijkstra(inicio, fin) {
     while (cola.length > 0) {
         const actual = cola.shift();
         const claveActual = actual.toString();
-        //console.log(actual.toString(), fin.toString())
-        //CAMINAR A LA POSICION
-        //await esperar(2000);
-        //caminarHacia(actual[0], actual[1]);
         if (claveActual === fin.toString()) break;
 
         const sucesores = encontrar_sucesores(actual[0], actual[1]);
@@ -146,25 +142,19 @@ async function resolverCaminoDijkstra(inicio, fin) {
             }
         }
         if (saltar_animacion == false) {
-            console.log("Ruta:", estructura.encontrarOrigen(actual));
+            //console.log("Ruta:", estructura.encontrarOrigen(actual));
             camino_temp = estructura.crear_lista_nodos_recorrer(actual);
-            await mover_desde_inicio_hasta_nodo(camino_temp.reverse())
-            await mover_desde_inicio_hasta_nodo(camino_temp.reverse())
+            //await mover_desde_inicio_hasta_nodo(camino_temp.reverse())        //DESDE EL INICIO HASTA ACTUAL
+            //await mover_desde_inicio_hasta_nodo(camino_temp.reverse())        //DESDE ACTUAL AL INICIO (PARA REGRESAR)
+            await mover_desde_comun_hasta_nodo(camino_temp.reverse())           //MOVERSE AL COMUN Y LUEGO AL NODO ACTUAL
         }
 
     }
-    console.log("Ruta:", estructura.encontrarOrigen(fin));
     let camino = estructura.crear_lista_nodos_recorrer(fin);
-    //console.log(camino)
-    //console.log(camino.reverse())
-    await mover_desde_inicio_hasta_nodo(camino.reverse())
-
-    /*for (let i = camino.length - 1; i >= 0; i--) {
-        console.log(camino[i]); 
-    }*/
+    //await mover_desde_inicio_hasta_nodo(camino.reverse())         //SI SE QUIERE QUE REGRESE AL INICIO
+    await mover_desde_comun_hasta_nodo(camino.reverse())            //SI SE QUIERE QUE REGRESE AL NODO EN COMUN
 
     //FINALIZACION DE ALGORITMO
-    console.log("FINALICE")
     //MOSTRAR LA VENTANA EMERGENTE
     abrir_emergente()
     mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])

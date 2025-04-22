@@ -194,6 +194,7 @@ function algoritmo3() {
 function iniciar_laberinto() {
     document.getElementById("navbar_seleccion").style.display = "none";
     let camino = [info_laberinto.inicio[0], info_laberinto.inicio[1]]
+    camino_nodo_anterior = []       //LISTA DE MOVIMIENTO PARA CAMINO NODO ANTERIOR
     if (seleccion_algoritmo === 1) {
         camino = resolverCaminoDijkstra(info_laberinto.inicio, info_laberinto.fin);
     } else if (seleccion_algoritmo === 2) {

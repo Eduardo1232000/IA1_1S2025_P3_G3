@@ -70,13 +70,13 @@ function detenerse() {
 }
 
 async function mover_desde_inicio_hasta_nodo(camino){
+    console.log("IDA:",camino)
     //MOVER AL PERSONAJE AL INICIO DEL LABERINTO
-    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+    //mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
     //RECORRER EL CAMINO POR ORDEN
-    for (let i = 0; i < camino.length; i++) {
+    for (let i = 1; i < camino.length; i++) {
         let nodo = camino[i];                           //NODO QUE LE TOCA
         caminarHacia(nodo[0], nodo[1]);                 // CAMINA HACIA EL NODO QUE LE TOCA
         await new Promise(resolve => setTimeout(resolve, 500)); // ESPERAR 1 SEGUNDO
     }
-
 }

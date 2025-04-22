@@ -149,6 +149,7 @@ async function resolverCaminoDijkstra(inicio, fin) {
             console.log("Ruta:", estructura.encontrarOrigen(actual));
             camino_temp = estructura.crear_lista_nodos_recorrer(actual);
             await mover_desde_inicio_hasta_nodo(camino_temp.reverse())
+            await mover_desde_inicio_hasta_nodo(camino_temp.reverse())
         }
 
     }

@@ -157,6 +157,9 @@ function cambiar_marcado(posx, posz) {
         bloque.position.x === posx &&
         bloque.position.z === posz
     );
+    if (bloque) {
+        return; // Ya está marcado, no hacer nada
+    }
 
     const block3 = new THREE.Mesh(geometry3, material3);
     block3.position.set(

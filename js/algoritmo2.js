@@ -67,33 +67,30 @@ function posToStr(pos) {
 }
 
 // BFS con debug
-function resolverCaminoBFS(inicio, fin) {
+async function resolverCaminoBFS(inicio, fin) {
     const cola = [inicio];
     const anteriores = {};
     const visitados = new Set();
 
-    anteriores[inicio] = "INICIO";
+    anteriores[posToStr(inicio)] = "INICIO";
     visitados.add(posToStr(inicio));
 
     const estructura = new BFS();
     estructura.insertar(inicio, "INICIO");
 
-    console.log("===== INICIO DEL RECORRIDO BFS =====");
+    let camino_temp = [];
+    let encontrado = false;
 
-    while (cola.length > 0) {
+    while (cola.length > 0 && !encontrado) {
         const actual = cola.shift();
         const claveActual = posToStr(actual);
 
-        console.log(`Visitando nodo: ${claveActual}`);
-
         if (claveActual === posToStr(fin)) {
-            console.log("FIN encontrado:", claveActual);
+            encontrado = true;
             break;
         }
 
         const sucesores = encontrar_sucesores(actual[0], actual[1]);
-
-        console.log(`Sucesores de ${claveActual}:`, sucesores);
 
         for (let vecino of sucesores) {
             const claveVecino = posToStr(vecino);
@@ -102,23 +99,30 @@ function resolverCaminoBFS(inicio, fin) {
                 visitados.add(claveVecino);
                 cola.push(vecino);
                 estructura.insertar(vecino, actual);
+
+                if (saltar_animacion === false) {
+                    camino_temp = estructura.crear_lista_nodos_recorrer(vecino);
+                    await mover_desde_comun_hasta_nodo(camino_temp.reverse());
+
+                    // Detener animación si se llega al nodo final
+                    if (claveVecino === posToStr(fin)) {
+                        encontrado = true;
+                        break;
+                    }
+                }
             }
         }
     }
 
-    console.log("===== FIN DEL RECORRIDO BFS =====");
-
-    const rutaTexto = estructura.encontrarOrigen(fin);
-    console.log("Ruta encontrada:", rutaTexto);
-
+    // Obtener y animar el camino final
     let camino = estructura.crear_lista_nodos_recorrer(fin);
-    camino = camino.reverse(); // Del inicio al fin
-    console.log("Camino óptimo encontrado:", camino);
+    await mover_desde_comun_hasta_nodo(camino.reverse());
 
-    // Mostrar nodos visitados que no están en el camino final
-    const caminoStr = new Set(camino.map(posToStr));
-    const nodosNoTomados = Array.from(visitados).filter(nodo => !caminoStr.has(nodo));
-    console.log("Nodos visitados pero NO en el camino óptimo:", nodosNoTomados);
+    abrir_emergente();
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
+    eliminar_bloques_recorridos();
+    document.getElementById("navbar_seleccion").style.display = "block";
+    saltar_animacion = false;
 
-    return camino;
+    return camino.reverse();
 }

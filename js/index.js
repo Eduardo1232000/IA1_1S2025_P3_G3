@@ -176,17 +176,20 @@ function cambiar_color(num) {
 }
 
 function algoritmo1() {
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
     seleccion_algoritmo = 1
     cambiar_color(1)
 
 }
 
 function algoritmo2() {
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
     seleccion_algoritmo = 2
     cambiar_color(2)
 }
 
 function algoritmo3() {
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
     seleccion_algoritmo = 3
     cambiar_color(3)
 }
@@ -244,6 +247,7 @@ function emergente_cambiar_mapa() {
 }
 
 function cambiar_mapa() {
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
     const pantalla_menu = document.getElementById('menu_inicio');
     pantalla_menu.classList.remove('slide-up');
     setTimeout(() => {

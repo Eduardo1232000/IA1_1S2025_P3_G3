@@ -82,6 +82,12 @@ async function mover_desde_inicio_hasta_nodo(camino) {
 async function mover_desde_comun_hasta_nodo(camino) {
     if (camino_nodo_anterior.length === 0) { //SI ESTA VACIA, ES PRIMER MOVIMIENTO
         camino_nodo_anterior = camino                           // GUARDA LA LISTA PARA COMPARAR CON LA SIGUIENTE (SIEMPRE SERA POS INICIAL)
+        for (let i = 0; i < camino.length; i++) {
+            let nodo = camino[i];
+            console.log("INICIAL ", nodo)
+            caminarHacia(nodo[0], nodo[1]);
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
     } else {
         let nodo_comun = encontrarUltimoNodoComun(camino_nodo_anterior, camino) 
         if(nodo_comun == null){     //SI ES NULL, ES PORQUE TODA LA LISTA ANTERIOR ESTA EN LA ACTUAL (SE MUEVE SOLO 1)

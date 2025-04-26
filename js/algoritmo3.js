@@ -129,9 +129,6 @@ class MinHeap {
 function posToStr([x, y]) { return `${x},${y}` }
 
 
-
-
-/* ── ALGORTIMO PRINCIPAL A* COMPLETO ───────── */
 async function resolverCaminoAStar(inicio, fin) {
     console.log("INICIO A*")
 
@@ -191,42 +188,28 @@ async function resolverCaminoAStar(inicio, fin) {
         }
     }
 
-    // 🚨 Si terminó o interrumpiste, usar posición actual
-    console.warn("No se encontró ruta completa o se saltó a final.");
+    console.warn("No se encontró ruta completa. Retrocediendo...");
 
-    // 🛑 Obtener coordenadas reales del personaje
     const filaActual = Math.round(personajeContenedor.position.x);
     const columnaActual = Math.round(personajeContenedor.position.z);
-
     const posicionActual = [filaActual, columnaActual];
-    console.log("Posición actual en celda:", posicionActual);
 
-    // 🚀 Buscar el nodo explorado más cercano
-    let nodoComun = buscarNodoMasCercano(posicionActual, estructura);
+    const nodoComun = buscarNodoMasCercano(posicionActual, estructura);
 
     if (!nodoComun) {
-        console.error("No se encontró nodo común cercano válido.");
+        console.error("No se encontró nodo común cercano.");
         return [];
     }
 
-    console.log("Nodo común encontrado:", nodoComun);
+    const caminoHastaInicio = estructura.crear_lista_nodos_recorrer(nodoComun).reverse();
 
-    // 🚀 Reconstruir camino desde el nodo encontrado hasta el fin
-    const caminoHastaFin = estructura.crear_lista_nodos_recorrer(fin).reverse();
-    const indiceComun = caminoHastaFin.findIndex(pos => JSON.stringify(pos) === JSON.stringify(nodoComun));
-
-    if (indiceComun !== -1) {
-        const caminoRestante = caminoHastaFin.slice(indiceComun);
-
-        await recorrer_laberinto(caminoRestante);
-        abrir_emergente();
-        mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
-        eliminar_bloques_recorridos();
-        document.getElementById("navbar_seleccion").style.display = "block";
-        saltar_animacion = false;
-        return caminoRestante;
-    } else {
-        console.error("No se encontró camino válido desde el nodo actual.");
-        return [];
-    }
+    await recorrer_laberinto(caminoHastaInicio);
+    
+    abrir_emergente();
+    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
+    eliminar_bloques_recorridos();
+    document.getElementById("navbar_seleccion").style.display = "block";
+    saltar_animacion = false;
+    
+    return caminoHastaInicio;
 }

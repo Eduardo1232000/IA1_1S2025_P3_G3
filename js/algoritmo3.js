@@ -11,8 +11,72 @@ class NodoAStar {
         this.vertice  = vertice          // [fila, col]
         this.g        = g                // coste real desde el inicio
         this.h        = h                // heurística al destino
-        this.f        = g + h            // f = g + h
-        this.anterior = anterior         // puntero al nodo anterior
+        this.f        = g + h             // f = g + h
+        this.anterior = anterior          // puntero al nodo anterior
+        this.siguiente = null             // para lista enlazada
+    }
+}
+
+/* ── Clase principal A* (como Dijkstra) ───── */
+class AStarEstructura {
+    constructor() {
+        this.raiz = null
+        this.ultimo = null
+    }
+
+    insertar(vertice, g, h, anterior) {
+        const nuevo = new NodoAStar(vertice, g, h, anterior)
+        if (this.ultimo === null) {
+            this.raiz = nuevo
+            this.ultimo = nuevo
+        } else {
+            this.ultimo.siguiente = nuevo
+            this.ultimo = nuevo
+        }
+    }
+
+    modificar(vertice, g, h, anterior) {
+        let actual = this.raiz
+        while (actual !== null) {
+            if (JSON.stringify(actual.vertice) === JSON.stringify(vertice)) {
+                actual.g = g
+                actual.h = h
+                actual.f = g + h
+                actual.anterior = anterior
+                return
+            }
+            actual = actual.siguiente
+        }
+        console.error("ERROR AL MODIFICAR. No existe el vértice:", vertice)
+    }
+
+    valorVertice(vertice) {
+        let actual = this.raiz
+        while (actual !== null) {
+            if (JSON.stringify(actual.vertice) === JSON.stringify(vertice)) {
+                return actual.g
+            }
+            actual = actual.siguiente
+        }
+        return "ERROR"
+    }
+
+    crear_lista_nodos_recorrer(vertice) {
+        let camino = []
+        if (vertice !== "INICIO") {
+            let actual = this.raiz
+            while (actual !== null) {
+                if (JSON.stringify(actual.vertice) === JSON.stringify(vertice)) {
+                    camino.push(actual.vertice)
+                    if (actual.anterior) {
+                        camino = camino.concat(this.crear_lista_nodos_recorrer(actual.anterior))
+                    }
+                    break
+                }
+                actual = actual.siguiente
+            }
+        }
+        return camino
     }
 }
 
@@ -38,7 +102,6 @@ class MinHeap {
         return min
     }
 
-    /* --- helpers privados --- */
     #burbujaArriba(i) {
         while (i > 0) {
             const p = Math.floor((i - 1) / 2)
@@ -53,7 +116,6 @@ class MinHeap {
             let izq = 2 * i + 1,
                 der = 2 * i + 2,
                 min = i
-
             if (izq < n && this.data[izq].f < this.data[min].f) min = izq
             if (der < n && this.data[der].f < this.data[min].f) min = der
             if (min === i) break
@@ -63,81 +125,108 @@ class MinHeap {
     }
 }
 
-/* ── Funciones de ayuda genéricas ─────────── */
+/* ── Funciones de ayuda ───────────────────── */
 function posToStr([x, y]) { return `${x},${y}` }
 
-async function animarVisita(nodo) {          
-    await esperar(500)                      
-    caminarHacia(nodo.vertice[0], nodo.vertice[1])
-}
 
-/* ── Reconstruir el camino terminado ─────── */
-function reconstruirCamino(nodoFinal) {
-    const camino = []
-    let actual = nodoFinal
-    while (actual) {
-        camino.push(actual.vertice)
-        actual = actual.anterior
-    }
-    return camino.reverse()
-}
 
-/* ── ALGORTIMO PRINCIPAL A* ───────────────── */
+
+/* ── ALGORTIMO PRINCIPAL A* COMPLETO ───────── */
 async function resolverCaminoAStar(inicio, fin) {
     console.log("INICIO A*")
-    /* estructuras principales */
-    const abierto = new MinHeap()                        // OPEN
-    const cerrado = new Set()                            // CLOSED
-    const nodos   = {}                                   // clave‑>NodoAStar
 
-    const h0      = heuristica(inicio, fin)
-    const nodoIni = new NodoAStar(inicio, 0, h0, null)
-    abierto.push(nodoIni)
-    nodos[posToStr(inicio)] = nodoIni
+    const abierto = new MinHeap();
+    const cerrado = new Set();
+    const estructura = new AStarEstructura();
+    const nodos = {};
+
+    const h0 = heuristica(inicio, fin);
+    const nodoIni = new NodoAStar(inicio, 0, h0, "INICIO")
+
+    abierto.push(nodoIni);
+    nodos[posToStr(inicio)] = nodoIni;
+    estructura.insertar(inicio, 0, h0, "INICIO");
 
     while (abierto.size() > 0) {
-        /* 1) obtener el nodo con f(n) mínimo */
-        const actual = abierto.pop()
-        const clave  = posToStr(actual.vertice)
+        const actual = abierto.pop();
+        const clave = posToStr(actual.vertice)
 
-        /* 2) si llegamos al final → reconstruir camino */
         if (clave === posToStr(fin)) {
-            const ruta = reconstruirCamino(actual)
-            console.log("Ruta:", ruta.join(" -> "))
-            abrir_emergente()                            
-            mover_personaje_inicio(
-                personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]
-            )
-            eliminar_bloques_recorridos()
+            const caminoFinal = estructura.crear_lista_nodos_recorrer(fin).reverse();
+            await recorrer_laberinto(caminoFinal);
+            abrir_emergente();
+            mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
+            eliminar_bloques_recorridos();
             document.getElementById("navbar_seleccion").style.display = "block";
-            return ruta
+            saltar_animacion = false;
+            return caminoFinal;
         }
 
-        /* 3) marcar como visitado */
-        cerrado.add(clave)
-        await animarVisita(actual)                       
+        cerrado.add(clave);
 
-        /* 4) expandir sucesores */
-        const sucesores = encontrar_sucesores(
-            actual.vertice[0], actual.vertice[1]
-        )
-
+        const sucesores = encontrar_sucesores(actual.vertice[0], actual.vertice[1]);
         for (const vecino of sucesores) {
-            const claveVec = posToStr(vecino)
-            if (cerrado.has(claveVec)) continue          // ya procesado
+            const claveVec = posToStr(vecino);
+            if (cerrado.has(claveVec)) continue;
 
-            const gTentativo = actual.g + 1              // coste uniforme = 1
+            const gTentativo = actual.g + 1;
 
             if (!(claveVec in nodos) || gTentativo < nodos[claveVec].g) {
-                const h = heuristica(vecino, fin)
-                const nuevoNodo = new NodoAStar(vecino, gTentativo, h, actual)
-                nodos[claveVec] = nuevoNodo
-                abierto.push(nuevoNodo)
+                const h = heuristica(vecino, fin);
+                const nuevoNodo = new NodoAStar(vecino, gTentativo, h, actual.vertice);
+                nodos[claveVec] = nuevoNodo;
+                abierto.push(nuevoNodo);
+
+                if (estructura.valorVertice(vecino) === "ERROR") {
+                    estructura.insertar(vecino, gTentativo, h, actual.vertice);
+                } else {
+                    estructura.modificar(vecino, gTentativo, h, actual.vertice);
+                }
             }
+        }
+
+        if (!saltar_animacion) {
+            const camino_temp = estructura.crear_lista_nodos_recorrer(actual.vertice).reverse();
+            await mover_desde_comun_hasta_nodo(camino_temp);
         }
     }
 
-    /* Si sale del bucle, no hay camino */
-    console.warn("No se encontró ruta.")
-    return []
+    // 🚨 Si terminó o interrumpiste, usar posición actual
+    console.warn("No se encontró ruta completa o se saltó a final.");
+
+    // 🛑 Obtener coordenadas reales del personaje
+    const filaActual = Math.round(personajeContenedor.position.x);
+    const columnaActual = Math.round(personajeContenedor.position.z);
+
+    const posicionActual = [filaActual, columnaActual];
+    console.log("Posición actual en celda:", posicionActual);
+
+    // 🚀 Buscar el nodo explorado más cercano
+    let nodoComun = buscarNodoMasCercano(posicionActual, estructura);
+
+    if (!nodoComun) {
+        console.error("No se encontró nodo común cercano válido.");
+        return [];
+    }
+
+    console.log("Nodo común encontrado:", nodoComun);
+
+    // 🚀 Reconstruir camino desde el nodo encontrado hasta el fin
+    const caminoHastaFin = estructura.crear_lista_nodos_recorrer(fin).reverse();
+    const indiceComun = caminoHastaFin.findIndex(pos => JSON.stringify(pos) === JSON.stringify(nodoComun));
+
+    if (indiceComun !== -1) {
+        const caminoRestante = caminoHastaFin.slice(indiceComun);
+
+        await recorrer_laberinto(caminoRestante);
+        abrir_emergente();
+        mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
+        eliminar_bloques_recorridos();
+        document.getElementById("navbar_seleccion").style.display = "block";
+        saltar_animacion = false;
+        return caminoRestante;
+    } else {
+        console.error("No se encontró camino válido desde el nodo actual.");
+        return [];
+    }
 }

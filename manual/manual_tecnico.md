@@ -15,7 +15,7 @@
 | Pedro Martin Francisco              | 201700656 |
 | Luis Antonio Cutzal Chalí           | 201700841 |
 
-# Intrudicción
+# Intruducción
 <p align="justify">
 El presente manual técnico documenta el desarrollo del proyecto MazeBot, una aplicación web tridimensional diseñada como parte de los requerimientos del curso de Inteligencia Artificial 1 de la Universidad de San Carlos de Guatemala.
 </p>

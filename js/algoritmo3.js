@@ -1,5 +1,4 @@
 /**************  A*  (A‑Star)  **************/
-
 /* ── Heurística Manhattan ────────────────── */
 function heuristica([x1, y1], [x2, y2]) {
     return Math.abs(x1 - x2) + Math.abs(y1 - y2)
@@ -17,7 +16,7 @@ class NodoAStar {
     }
 }
 
-/* ── Clase principal A* (como Dijkstra) ───── */
+/* ── Clase principal A*───── */
 class AStarEstructura {
     constructor() {
         this.raiz = null
@@ -128,88 +127,58 @@ class MinHeap {
 /* ── Funciones de ayuda ───────────────────── */
 function posToStr([x, y]) { return `${x},${y}` }
 
-
 async function resolverCaminoAStar(inicio, fin) {
     console.log("INICIO A*")
 
-    const abierto = new MinHeap();
-    const cerrado = new Set();
-    const estructura = new AStarEstructura();
-    const nodos = {};
+    const abierto = new MinHeap()
+    const cerrado = new Set()
+    const estructura = new AStarEstructura()
+    const nodos = {}
 
-    const h0 = heuristica(inicio, fin);
+    const h0 = heuristica(inicio, fin)
     const nodoIni = new NodoAStar(inicio, 0, h0, "INICIO")
 
-    abierto.push(nodoIni);
-    nodos[posToStr(inicio)] = nodoIni;
-    estructura.insertar(inicio, 0, h0, "INICIO");
+    abierto.push(nodoIni)
+    nodos[posToStr(inicio)] = nodoIni
+    estructura.insertar(inicio, 0, h0, "INICIO")
 
     while (abierto.size() > 0) {
-        const actual = abierto.pop();
+        const actual = abierto.pop()
         const clave = posToStr(actual.vertice)
 
-        if (clave === posToStr(fin)) {
-            const caminoFinal = estructura.crear_lista_nodos_recorrer(fin).reverse();
-            await recorrer_laberinto(caminoFinal);
-            abrir_emergente();
-            mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
-            eliminar_bloques_recorridos();
-            document.getElementById("navbar_seleccion").style.display = "block";
-            saltar_animacion = false;
-            return caminoFinal;
-        }
+        cerrado.add(clave)
 
-        cerrado.add(clave);
-
-        const sucesores = encontrar_sucesores(actual.vertice[0], actual.vertice[1]);
+        const sucesores = encontrar_sucesores(actual.vertice[0], actual.vertice[1])
         for (const vecino of sucesores) {
-            const claveVec = posToStr(vecino);
-            if (cerrado.has(claveVec)) continue;
+            const claveVec = posToStr(vecino)
+            if (cerrado.has(claveVec)) continue
 
-            const gTentativo = actual.g + 1;
+            const gTentativo = actual.g + 1
 
             if (!(claveVec in nodos) || gTentativo < nodos[claveVec].g) {
-                const h = heuristica(vecino, fin);
-                const nuevoNodo = new NodoAStar(vecino, gTentativo, h, actual.vertice);
-                nodos[claveVec] = nuevoNodo;
-                abierto.push(nuevoNodo);
+                const h = heuristica(vecino, fin)
+                const nuevoNodo = new NodoAStar(vecino, gTentativo, h, actual.vertice)
+                nodos[claveVec] = nuevoNodo
+                abierto.push(nuevoNodo)
 
                 if (estructura.valorVertice(vecino) === "ERROR") {
-                    estructura.insertar(vecino, gTentativo, h, actual.vertice);
+                    estructura.insertar(vecino, gTentativo, h, actual.vertice)
                 } else {
-                    estructura.modificar(vecino, gTentativo, h, actual.vertice);
+                    estructura.modificar(vecino, gTentativo, h, actual.vertice)
                 }
             }
         }
-
-        if (!saltar_animacion) {
-            const camino_temp = estructura.crear_lista_nodos_recorrer(actual.vertice).reverse();
-            await mover_desde_comun_hasta_nodo(camino_temp);
+        if (saltar_animacion === false) {
+            const camino_temp = estructura.crear_lista_nodos_recorrer(actual.vertice).reverse()
+            await mover_desde_comun_hasta_nodo(camino_temp)
         }
     }
-
-    console.warn("No se encontró ruta completa. Retrocediendo...");
-
-    const filaActual = Math.round(personajeContenedor.position.x);
-    const columnaActual = Math.round(personajeContenedor.position.z);
-    const posicionActual = [filaActual, columnaActual];
-
-    const nodoComun = buscarNodoMasCercano(posicionActual, estructura);
-
-    if (!nodoComun) {
-        console.error("No se encontró nodo común cercano.");
-        return [];
-    }
-
-    const caminoHastaInicio = estructura.crear_lista_nodos_recorrer(nodoComun).reverse();
-
-    await recorrer_laberinto(caminoHastaInicio);
-    
-    abrir_emergente();
-    mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1]);
-    eliminar_bloques_recorridos();
-    document.getElementById("navbar_seleccion").style.display = "block";
-    saltar_animacion = false;
-    
-    return caminoHastaInicio;
+        const caminoFinal = estructura.crear_lista_nodos_recorrer(fin)
+        await mover_desde_comun_hasta_nodo(caminoFinal.reverse())
+        abrir_emergente()
+        mover_personaje_inicio(personajeContenedor, info_laberinto.inicio[0], info_laberinto.inicio[1])
+        eliminar_bloques_recorridos()
+        document.getElementById("navbar_seleccion").style.display = "block"
+        saltar_animacion = false
+        return caminoFinal
 }

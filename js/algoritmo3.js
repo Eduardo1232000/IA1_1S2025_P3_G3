@@ -146,6 +146,11 @@ async function resolverCaminoAStar(inicio, fin) {
         const actual = abierto.pop()
         const clave = posToStr(actual.vertice)
 
+        // Check if current node is the goal
+        if (actual.vertice[0] === fin[0] && actual.vertice[1] === fin[1]) {
+            break// Exit the loop once the goal is reached
+        }
+
         cerrado.add(clave)
 
         const sucesores = encontrar_sucesores(actual.vertice[0], actual.vertice[1])
